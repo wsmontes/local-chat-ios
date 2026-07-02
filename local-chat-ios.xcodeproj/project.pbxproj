@@ -7,12 +7,46 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0332EE7BA9FFD149B0BEE0C4 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ED24C3D58901900931F5D2C /* ModelManager.swift */; };
+		04F5CEE790EC69E6227CA6D0 /* ResultsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA43E18C9E4700C8EB1CA668 /* ResultsListView.swift */; };
+		1F1B315EB78DE8BAD4AF9B23 /* InferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FC256BFC51662B76D1F1AC /* InferenceEngine.swift */; };
+		23D26AA4F5A49A211494730C /* MemoryGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBAF9C4B5246BE056F0E214 /* MemoryGaugeView.swift */; };
+		2E7041B2D6E89762B54A8539 /* ModelsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F966E8E35BA3FEC4DFAD9B97 /* ModelsListView.swift */; };
+		311B2C954CA1D777C3B94499 /* TestHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC40D865847E5D5F6AEBFEF /* TestHarness.swift */; };
+		382235546A123A6013606B55 /* ResultDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20740C63D45F1662DF50148D /* ResultDetailView.swift */; };
+		463F27D02B39CBF109462DF8 /* test_article.txt in Resources */ = {isa = PBXBuildFile; fileRef = C0D41B8AC8D56D43A6F18FE8 /* test_article.txt */; };
 		8162F7281C586990A1EFDA7D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 382967033091A27E82AA473E /* Foundation.framework */; };
+		81CE1AFE2199DE175045E91A /* MetricsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038F62E8F1700969B74F3394 /* MetricsStore.swift */; };
+		82CE2F50FEE669C8A25A54F0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB07593AD93EB5810A0A30F4 /* ContentView.swift */; };
+		8605BA3C55A240AB6561B51F /* MemoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0B49ADC7552E92188E0F77 /* MemoryMonitor.swift */; };
+		86F42CD9E5BE3ED11E629B5C /* LocalChatIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72104A2ECFC3CEC4ED64776 /* LocalChatIOSApp.swift */; };
+		CF7DD282BBA33B45C58546F9 /* InferenceResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB30DAD678153228BA2257C /* InferenceResult.swift */; };
+		E02DD46BC94CFA2910464C19 /* RunTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F8E1BA2686FCB806B2BF4E /* RunTestView.swift */; };
+		E428DB0A224049AFC86A29E3 /* ModelLoadStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF00B436F0B63B25199387BF /* ModelLoadStatus.swift */; };
+		EF34FF66D788FCE4B91C036A /* ModelInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCF57ECFF6D59CB1F583093 /* ModelInfo.swift */; };
+		F19C5772EC5ACB991672A8CF /* InferenceInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C1CB9BD5D2279D42077FC0 /* InferenceInput.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		038F62E8F1700969B74F3394 /* MetricsStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MetricsStore.swift; path = "local-chat-ios/Services/MetricsStore.swift"; sourceTree = "<group>"; };
+		20740C63D45F1662DF50148D /* ResultDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ResultDetailView.swift; path = "local-chat-ios/UI/Results/ResultDetailView.swift"; sourceTree = "<group>"; };
 		3268D97CF38B13133EC9787F /* local-chat-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "local-chat-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		382967033091A27E82AA473E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		3CCF57ECFF6D59CB1F583093 /* ModelInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModelInfo.swift; path = "local-chat-ios/Models/ModelInfo.swift"; sourceTree = "<group>"; };
+		7BC40D865847E5D5F6AEBFEF /* TestHarness.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TestHarness.swift; path = "local-chat-ios/Services/TestHarness.swift"; sourceTree = "<group>"; };
+		7ED24C3D58901900931F5D2C /* ModelManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModelManager.swift; path = "local-chat-ios/Services/ModelManager.swift"; sourceTree = "<group>"; };
+		92C1CB9BD5D2279D42077FC0 /* InferenceInput.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = InferenceInput.swift; path = "local-chat-ios/Models/InferenceInput.swift"; sourceTree = "<group>"; };
+		9F0B49ADC7552E92188E0F77 /* MemoryMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MemoryMonitor.swift; path = "local-chat-ios/Services/MemoryMonitor.swift"; sourceTree = "<group>"; };
+		A72104A2ECFC3CEC4ED64776 /* LocalChatIOSApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LocalChatIOSApp.swift; path = "local-chat-ios/App/LocalChatIOSApp.swift"; sourceTree = "<group>"; };
+		ACBAF9C4B5246BE056F0E214 /* MemoryGaugeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MemoryGaugeView.swift; path = "local-chat-ios/UI/RunTest/MemoryGaugeView.swift"; sourceTree = "<group>"; };
+		B7F8E1BA2686FCB806B2BF4E /* RunTestView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RunTestView.swift; path = "local-chat-ios/UI/RunTest/RunTestView.swift"; sourceTree = "<group>"; };
+		BF00B436F0B63B25199387BF /* ModelLoadStatus.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModelLoadStatus.swift; path = "local-chat-ios/Models/ModelLoadStatus.swift"; sourceTree = "<group>"; };
+		C0D41B8AC8D56D43A6F18FE8 /* test_article.txt */ = {isa = PBXFileReference; includeInIndex = 1; name = test_article.txt; path = "local-chat-ios/Resources/test_article.txt"; sourceTree = "<group>"; };
+		CA43E18C9E4700C8EB1CA668 /* ResultsListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ResultsListView.swift; path = "local-chat-ios/UI/Results/ResultsListView.swift"; sourceTree = "<group>"; };
+		F7FC256BFC51662B76D1F1AC /* InferenceEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = InferenceEngine.swift; path = "local-chat-ios/Services/InferenceEngine.swift"; sourceTree = "<group>"; };
+		F966E8E35BA3FEC4DFAD9B97 /* ModelsListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModelsListView.swift; path = "local-chat-ios/UI/Models/ModelsListView.swift"; sourceTree = "<group>"; };
+		FAB30DAD678153228BA2257C /* InferenceResult.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = InferenceResult.swift; path = "local-chat-ios/Models/InferenceResult.swift"; sourceTree = "<group>"; };
+		FB07593AD93EB5810A0A30F4 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = "local-chat-ios/UI/ContentView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +61,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		39D6B5A0640D3D71E1FB3861 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A72104A2ECFC3CEC4ED64776 /* LocalChatIOSApp.swift */,
+			);
+			name = App;
+			path = "local-chat-ios/App";
+			sourceTree = "<group>";
+		};
 		3EE1A12CB80D78004EBE3BB0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -35,12 +78,33 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		6395C97137FE2CFF5CB78F8A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				FAB30DAD678153228BA2257C /* InferenceResult.swift */,
+				BF00B436F0B63B25199387BF /* ModelLoadStatus.swift */,
+				3CCF57ECFF6D59CB1F583093 /* ModelInfo.swift */,
+				92C1CB9BD5D2279D42077FC0 /* InferenceInput.swift */,
+			);
+			name = Models;
+			path = "local-chat-ios/Models";
+			sourceTree = "<group>";
+		};
 		6A0DEBBC23651C119F55712A /* iOS */ = {
 			isa = PBXGroup;
 			children = (
 				382967033091A27E82AA473E /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		A4C0A3764432D281C6E5C5B1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				C0D41B8AC8D56D43A6F18FE8 /* test_article.txt */,
+			);
+			name = Resources;
+			path = "local-chat-ios/Resources";
 			sourceTree = "<group>";
 		};
 		A6D1B412A45B11C1878E16A8 /* Frameworks */ = {
@@ -56,7 +120,65 @@
 			children = (
 				3EE1A12CB80D78004EBE3BB0 /* Products */,
 				A6D1B412A45B11C1878E16A8 /* Frameworks */,
+				39D6B5A0640D3D71E1FB3861 /* App */,
+				6395C97137FE2CFF5CB78F8A /* Models */,
+				BEF18CCB2CF527F7D1195AE7 /* Services */,
+				FA8ECD2C1E38032718616747 /* UI */,
+				A4C0A3764432D281C6E5C5B1 /* Resources */,
 			);
+			sourceTree = "<group>";
+		};
+		BEF18CCB2CF527F7D1195AE7 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				038F62E8F1700969B74F3394 /* MetricsStore.swift */,
+				F7FC256BFC51662B76D1F1AC /* InferenceEngine.swift */,
+				9F0B49ADC7552E92188E0F77 /* MemoryMonitor.swift */,
+				7BC40D865847E5D5F6AEBFEF /* TestHarness.swift */,
+				7ED24C3D58901900931F5D2C /* ModelManager.swift */,
+			);
+			name = Services;
+			path = "local-chat-ios/Services";
+			sourceTree = "<group>";
+		};
+		C3598A22417554C8F374E15E /* RunTest */ = {
+			isa = PBXGroup;
+			children = (
+				ACBAF9C4B5246BE056F0E214 /* MemoryGaugeView.swift */,
+				B7F8E1BA2686FCB806B2BF4E /* RunTestView.swift */,
+			);
+			name = RunTest;
+			path = "local-chat-ios/UI/RunTest";
+			sourceTree = "<group>";
+		};
+		D04B70F4515127F4629BB34E /* Results */ = {
+			isa = PBXGroup;
+			children = (
+				20740C63D45F1662DF50148D /* ResultDetailView.swift */,
+				CA43E18C9E4700C8EB1CA668 /* ResultsListView.swift */,
+			);
+			name = Results;
+			path = "local-chat-ios/UI/Results";
+			sourceTree = "<group>";
+		};
+		EA5D129949B6072630BAB107 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F966E8E35BA3FEC4DFAD9B97 /* ModelsListView.swift */,
+			);
+			name = Models;
+			path = "local-chat-ios/UI/Models";
+			sourceTree = "<group>";
+		};
+		FA8ECD2C1E38032718616747 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				C3598A22417554C8F374E15E /* RunTest */,
+				D04B70F4515127F4629BB34E /* Results */,
+				EA5D129949B6072630BAB107 /* Models */,
+				FB07593AD93EB5810A0A30F4 /* ContentView.swift */,
+			);
+			name = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -113,6 +235,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				463F27D02B39CBF109462DF8 /* test_article.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +246,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82CE2F50FEE669C8A25A54F0 /* ContentView.swift in Sources */,
+				86F42CD9E5BE3ED11E629B5C /* LocalChatIOSApp.swift in Sources */,
+				CF7DD282BBA33B45C58546F9 /* InferenceResult.swift in Sources */,
+				E428DB0A224049AFC86A29E3 /* ModelLoadStatus.swift in Sources */,
+				EF34FF66D788FCE4B91C036A /* ModelInfo.swift in Sources */,
+				F19C5772EC5ACB991672A8CF /* InferenceInput.swift in Sources */,
+				81CE1AFE2199DE175045E91A /* MetricsStore.swift in Sources */,
+				1F1B315EB78DE8BAD4AF9B23 /* InferenceEngine.swift in Sources */,
+				8605BA3C55A240AB6561B51F /* MemoryMonitor.swift in Sources */,
+				311B2C954CA1D777C3B94499 /* TestHarness.swift in Sources */,
+				0332EE7BA9FFD149B0BEE0C4 /* ModelManager.swift in Sources */,
+				23D26AA4F5A49A211494730C /* MemoryGaugeView.swift in Sources */,
+				E02DD46BC94CFA2910464C19 /* RunTestView.swift in Sources */,
+				382235546A123A6013606B55 /* ResultDetailView.swift in Sources */,
+				04F5CEE790EC69E6227CA6D0 /* ResultsListView.swift in Sources */,
+				2E7041B2D6E89762B54A8539 /* ModelsListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
