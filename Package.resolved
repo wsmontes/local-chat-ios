@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "localllmclient",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tattn/LocalLLMClient",
+      "state" : {
+        "revision" : "main",
+        "version" : "0.5.0"
+      }
+    }
+  ],
+  "version" : 2
+}
