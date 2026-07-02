@@ -113,7 +113,7 @@ struct RunTestView: View {
                 if harness.isRunning {
                     ProgressView()
                         .tint(.white)
-                    Text("Running…")
+                    Text(harness.statusMessage)
                 } else {
                     Image(systemName: "play.fill")
                     Text("Run Inference")

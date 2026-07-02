@@ -6,15 +6,16 @@ final class TestHarness: ObservableObject {
     @Published var liveTokenCount = 0
     @Published var liveTokensPerSecond = 0.0
     @Published var statusMessage = ""
+    @Published var inferencePhase: InferenceEngine.Phase = .loading
 
     private let memoryMonitor = MemoryMonitor()
     private let inferenceEngine = InferenceEngine()
     private let metricsStore = MetricsStore()
 
-    /// Run a complete test: measure memory, run inference, record results.
     func runTest(model: ModelInfo, articleText: String) async -> InferenceResult {
         isRunning = true
-        statusMessage = "Starting inference..."
+        inferencePhase = .loading
+        statusMessage = "Loading model..."
         liveTokenCount = 0
         liveTokensPerSecond = 0
 
@@ -28,7 +29,23 @@ final class TestHarness: ObservableObject {
             result = try await inferenceEngine.run(
                 input: input,
                 modelName: model.fileName,
-                modelURL: model.fileURL
+                modelURL: model.fileURL,
+                onProgress: { [weak self] progress in
+                    Task { @MainActor [weak self] in
+                        guard let self else { return }
+                        self.inferencePhase = progress.phase
+                        self.liveTokenCount = progress.tokenCount
+                        self.liveTokensPerSecond = progress.tokensPerSecond
+                        switch progress.phase {
+                        case .loading:
+                            self.statusMessage = "Loading model..."
+                        case .generating:
+                            self.statusMessage = "Generating..."
+                        case .done:
+                            self.statusMessage = "Done"
+                        }
+                    }
+                }
             )
         } catch {
             isRunning = false

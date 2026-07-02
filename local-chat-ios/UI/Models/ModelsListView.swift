@@ -5,6 +5,7 @@ struct ModelsListView: View {
     @State private var models: [ModelInfo] = []
     @State private var showFileImporter = false
     @State private var importError: String?
+    @State private var showImportError = false
 
     private let modelManager = ModelManager()
 
@@ -43,7 +44,7 @@ struct ModelsListView: View {
             ) { result in
                 handleImport(result)
             }
-            .alert("Import Error", isPresented: .constant(importError != nil)) {
+            .alert("Import Error", isPresented: $showImportError) {
                 Button("OK") { importError = nil }
             } message: {
                 Text(importError ?? "")
@@ -107,15 +108,28 @@ struct ModelsListView: View {
     }
 
     private func handleImport(_ result: Result<[URL], Error>) {
-        Task {
-            do {
-                let urls = try result.get()
-                guard let url = urls.first else { return }
-                _ = try await modelManager.importModel(from: url)
-                models = await modelManager.discoverModels()
-            } catch {
-                importError = error.localizedDescription
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            // Lock security-scoped access BEFORE the async Task
+            guard url.startAccessingSecurityScopedResource() else {
+                importError = "Permission denied — cannot access the selected file."
+                showImportError = true
+                return
             }
+            Task {
+                defer { url.stopAccessingSecurityScopedResource() }
+                do {
+                    _ = try await modelManager.importModel(from: url)
+                    models = await modelManager.discoverModels()
+                } catch {
+                    importError = error.localizedDescription
+                    showImportError = true
+                }
+            }
+        case .failure(let error):
+            importError = error.localizedDescription
+            showImportError = true
         }
     }
 }
