@@ -106,10 +106,11 @@ struct ModelsListView: View {
         }
     }
 
-    private func handleImport(_ result: Result<URL, Error>) {
+    private func handleImport(_ result: Result<[URL], Error>) {
         Task {
             do {
-                let url = try result.get()
+                let urls = try result.get()
+                guard let url = urls.first else { return }
                 _ = try await modelManager.importModel(from: url)
                 models = await modelManager.discoverModels()
             } catch {
