@@ -13,26 +13,36 @@ struct RunTestView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    modelPickerSection
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 20) {
+                        modelPickerSection
 
-                    MemoryGaugeView(usedMemoryMB: currentMemoryMB)
-                        .padding(.horizontal)
+                        MemoryGaugeView(usedMemoryMB: currentMemoryMB)
+                            .padding(.horizontal)
 
-                    textInputSection
+                        textInputSection
 
-                    runButtonSection
+                        runButtonSection
 
-                    if harness.isRunning {
-                        liveMetricsSection
+                        if harness.isRunning || lastResult != nil {
+                            liveMetricsSection
+                        }
+
+                        if let result = lastResult {
+                            resultSummarySection(result)
+                                .id("result")
+                        }
                     }
-
-                    if let result = lastResult {
-                        resultSummarySection(result)
+                    .padding(.vertical)
+                }
+                .onChange(of: lastResult?.id) { _, _ in
+                    if lastResult != nil {
+                        withAnimation {
+                            proxy.scrollTo("result", anchor: .top)
+                        }
                     }
                 }
-                .padding(.vertical)
             }
             .navigationTitle("Run Test")
             .task {
@@ -86,7 +96,7 @@ struct RunTestView: View {
 
             TextEditor(text: $articleText)
                 .font(.body)
-                .frame(minHeight: 200)
+                .frame(minHeight: 120, maxHeight: 200)
                 .padding(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -133,6 +143,10 @@ struct RunTestView: View {
         HStack(spacing: 24) {
             MetricBadge(label: "Tokens", value: "\(harness.liveTokenCount)")
             MetricBadge(label: "tok/s", value: String(format: "%.1f", harness.liveTokensPerSecond))
+            if !harness.isRunning {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            }
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
@@ -143,27 +157,28 @@ struct RunTestView: View {
     @ViewBuilder
     private func resultSummarySection(_ result: InferenceResult) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Last Result")
+            Text("Summary")
                 .font(.headline)
                 .padding(.horizontal)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(result.summary)
-                    .font(.body)
-                    .padding()
-                    .background(Color.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            Text(result.summary)
+                .font(.body)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal)
 
-                HStack(spacing: 16) {
-                    MetricBadge(label: "Latency", value: "\(String(format: "%.0f", result.latencyMs))ms")
-                    MetricBadge(label: "tok/s", value: String(format: "%.1f", result.tokensPerSecond))
-                    MetricBadge(label: "TTFT", value: "\(String(format: "%.0f", result.timeToFirstTokenMs))ms")
-                    MetricBadge(label: "Mem", value: "\(String(format: "%.0f", result.peakMemoryMB))MB")
-                }
-
-                LatencyBadge(tier: result.latencyTier)
+            HStack(spacing: 16) {
+                MetricBadge(label: "Latency", value: "\(String(format: "%.0f", result.latencyMs))ms")
+                MetricBadge(label: "tok/s", value: String(format: "%.1f", result.tokensPerSecond))
+                MetricBadge(label: "TTFT", value: "\(String(format: "%.0f", result.timeToFirstTokenMs))ms")
+                MetricBadge(label: "Mem", value: "\(String(format: "%.0f", result.peakMemoryMB))MB")
             }
             .padding(.horizontal)
+
+            LatencyBadge(tier: result.latencyTier)
+                .padding(.horizontal)
         }
     }
 
