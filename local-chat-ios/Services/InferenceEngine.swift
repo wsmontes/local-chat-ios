@@ -3,7 +3,7 @@ import LocalLLMClient
 import LocalLLMClientLlama
 
 actor InferenceEngine {
-    private var activeClient: LocalLLMClient?
+    private var activeClient: LlamaClient?
 
     /// Run summarization inference with the given input and model.
     func run(input: InferenceInput, modelName: String, modelURL: URL) async throws -> InferenceResult {
@@ -21,17 +21,17 @@ actor InferenceEngine {
         )
         self.activeClient = client
 
-        let llmInput = LLMInput.text(prompt)
+        let llmInput = LLMInput.plain(prompt)
 
         var outputTokens = 0
         var firstToken = true
         var timeToFirstTokenMs: Double = 0
         var summary = ""
 
-        let stream = try await client.textStream(from: llmInput)
+        let generator = try client.textStream(from: llmInput)
 
         do {
-            for try await token in stream {
+            for try await token in generator {
                 if firstToken {
                     timeToFirstTokenMs = Date().timeIntervalSince(startTime) * 1000
                     firstToken = false
@@ -84,7 +84,7 @@ actor InferenceEngine {
     }
 
     func cancel() {
-        activeClient = nil
+        activeClient?.pauseGeneration()
     }
 
     private func estimateTokenCount(_ text: String) -> Int {

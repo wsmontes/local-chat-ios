@@ -1,6 +1,6 @@
 import Foundation
 
-struct ModelInfo: Identifiable, Equatable {
+struct ModelInfo: Identifiable, Equatable, Hashable {
     let id: String
     let fileName: String
     let fileURL: URL

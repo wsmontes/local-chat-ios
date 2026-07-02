@@ -1,6 +1,6 @@
 import Foundation
 
-enum ModelLoadStatus: Equatable {
+enum ModelLoadStatus: Equatable, Hashable {
     case available
     case loading(progress: Double)
     case loaded
