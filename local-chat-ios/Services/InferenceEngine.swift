@@ -84,7 +84,7 @@ actor InferenceEngine {
     }
 
     func cancel() {
-        activeClient?.pauseGeneration()
+        activeClient = nil
     }
 
     private func estimateTokenCount(_ text: String) -> Int {

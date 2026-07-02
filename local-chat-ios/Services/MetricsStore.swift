@@ -10,10 +10,10 @@ actor MetricsStore {
     }
 
     /// Persist a single result by appending to the existing array.
-    func save(_ result: InferenceResult) async {
-        var existing = await loadAll()
+    func save(_ result: InferenceResult) {
+        var existing = loadAll()
         existing.append(result)
-        await writeAll(existing)
+        writeAll(existing)
     }
 
     /// Load all persisted results, sorted by most recent first.
@@ -45,7 +45,7 @@ actor MetricsStore {
 
     // MARK: - Private
 
-    private func writeAll(_ results: [InferenceResult]) async {
+    private func writeAll(_ results: [InferenceResult]) {
         guard let data = try? JSONEncoder().encode(results) else { return }
         try? data.write(to: storageURL, options: .atomic)
     }
