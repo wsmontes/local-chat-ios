@@ -30,7 +30,7 @@ final class InferenceEngine: @unchecked Sendable {
         onProgress: (@Sendable (Progress) -> Void)? = nil
     ) async throws -> InferenceResult {
         let prompt = input.buildPrompt()
-        let maxOutputTokens = 256
+        let params = input.parameters
 
         return try await Task.detached(priority: .userInitiated) { [self] in
             let startTime = Date()
@@ -40,10 +40,10 @@ final class InferenceEngine: @unchecked Sendable {
             let client = try await LocalLLMClient.llama(
                 url: modelURL,
                 parameter: .init(
-                    context: 100_000,
-                    temperature: 0.3,
-                    topK: 40,
-                    topP: 0.9
+                    context: params.contextSize,
+                    temperature: Float(params.temperature),
+                    topK: params.topK,
+                    topP: Float(params.topP)
                 )
             )
 
@@ -52,8 +52,8 @@ final class InferenceEngine: @unchecked Sendable {
 
             state.withLock { $0.activeClient = client }
 
-            // If a custom template is used, send as plain (template already has special tokens).
-            // Otherwise, use chat format so the model knows when to stop.
+            // Template mode: send raw (template has special tokens).
+            // Simple mode: use chat format.
             let llmInput: LLMInput
             if input.template != nil {
                 llmInput = LLMInput.plain(prompt)
@@ -74,7 +74,6 @@ final class InferenceEngine: @unchecked Sendable {
             onProgress?(Progress(tokenCount: 0, tokensPerSecond: 0, phase: .generating))
 
             var lastProgressTime = Date()
-            var stoppedEarly = false
 
             do {
                 for try await token in generator {
@@ -85,13 +84,8 @@ final class InferenceEngine: @unchecked Sendable {
                     summary += token
                     outputTokens += 1
 
-                    // Hard cap: stop at maxOutputTokens
-                    if outputTokens >= maxOutputTokens {
-                        stoppedEarly = true
-                        break
-                    }
+                    if outputTokens >= params.maxOutputTokens { break }
 
-                    // Throttle progress to every 100ms
                     let now = Date()
                     if now.timeIntervalSince(lastProgressTime) > 0.1 {
                         let elapsed = now.timeIntervalSince(startTime)
@@ -100,7 +94,6 @@ final class InferenceEngine: @unchecked Sendable {
                         lastProgressTime = now
                     }
 
-                    // Check cancellation
                     let c: Bool = state.withLock { $0.isCancelled }
                     if c { break }
                 }
