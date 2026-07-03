@@ -11,7 +11,6 @@ final class InferenceEngine: @unchecked Sendable {
         var isCancelled = false
     }
 
-    /// Progress reported during inference.
     struct Progress: Sendable {
         let tokenCount: Int
         let tokensPerSecond: Double
@@ -24,7 +23,6 @@ final class InferenceEngine: @unchecked Sendable {
         case done
     }
 
-    /// Run summarization inference with progress callbacks on a background thread.
     func run(
         input: InferenceInput,
         modelName: String,
@@ -32,31 +30,39 @@ final class InferenceEngine: @unchecked Sendable {
         onProgress: (@Sendable (Progress) -> Void)? = nil
     ) async throws -> InferenceResult {
         let prompt = input.buildPrompt()
+        let maxOutputTokens = 256
 
-        // Capture everything needed by the detached task
         return try await Task.detached(priority: .userInitiated) { [self] in
             let startTime = Date()
 
-            // Phase 1: Load model
             onProgress?(Progress(tokenCount: 0, tokensPerSecond: 0, phase: .loading))
 
             let client = try await LocalLLMClient.llama(
                 url: modelURL,
                 parameter: .init(
-                    context: 4096,
+                    context: 100_000,
                     temperature: 0.3,
                     topK: 40,
                     topP: 0.9
                 )
             )
 
-            // Check cancellation
             let cancelled: Bool = state.withLock { $0.isCancelled }
             if cancelled { throw CancellationError() }
 
             state.withLock { $0.activeClient = client }
 
-            let llmInput = LLMInput.plain(prompt)
+            // If a custom template is used, send as plain (template already has special tokens).
+            // Otherwise, use chat format so the model knows when to stop.
+            let llmInput: LLMInput
+            if input.template != nil {
+                llmInput = LLMInput.plain(prompt)
+            } else {
+                llmInput = LLMInput.chat([
+                    .system("You are a helpful assistant. Summarize the given article in 2-3 sentences. Reply ONLY with the summary, nothing else."),
+                    .user(prompt)
+                ])
+            }
 
             var outputTokens = 0
             var firstToken = true
@@ -65,10 +71,10 @@ final class InferenceEngine: @unchecked Sendable {
 
             let generator = try client.textStream(from: llmInput)
 
-            // Phase 2: Generate
             onProgress?(Progress(tokenCount: 0, tokensPerSecond: 0, phase: .generating))
 
             var lastProgressTime = Date()
+            var stoppedEarly = false
 
             do {
                 for try await token in generator {
@@ -79,7 +85,13 @@ final class InferenceEngine: @unchecked Sendable {
                     summary += token
                     outputTokens += 1
 
-                    // Throttle progress updates to every 100ms
+                    // Hard cap: stop at maxOutputTokens
+                    if outputTokens >= maxOutputTokens {
+                        stoppedEarly = true
+                        break
+                    }
+
+                    // Throttle progress to every 100ms
                     let now = Date()
                     if now.timeIntervalSince(lastProgressTime) > 0.1 {
                         let elapsed = now.timeIntervalSince(startTime)
@@ -88,7 +100,7 @@ final class InferenceEngine: @unchecked Sendable {
                         lastProgressTime = now
                     }
 
-                    // Check cancellation periodically
+                    // Check cancellation
                     let c: Bool = state.withLock { $0.isCancelled }
                     if c { break }
                 }
@@ -96,19 +108,14 @@ final class InferenceEngine: @unchecked Sendable {
                 state.withLock { $0.activeClient = nil }
                 let latencyMs = Date().timeIntervalSince(startTime) * 1000
                 return InferenceResult(
-                    id: UUID(),
-                    modelId: input.modelId,
-                    modelName: modelName,
+                    id: UUID(), modelId: input.modelId, modelName: modelName,
                     inputTokenCount: estimateTokenCount(prompt),
                     outputTokenCount: outputTokens,
                     articleText: String(input.articleText.prefix(2000)),
                     summary: summary.isEmpty ? "Inference failed: \(error.localizedDescription)" : summary,
-                    latencyMs: latencyMs,
-                    timeToFirstTokenMs: timeToFirstTokenMs,
+                    latencyMs: latencyMs, timeToFirstTokenMs: timeToFirstTokenMs,
                     tokensPerSecond: latencyMs > 0 ? Double(outputTokens) / (latencyMs / 1000.0) : 0,
-                    peakMemoryMB: 0,
-                    timestamp: Date(),
-                    didFail: true,
+                    peakMemoryMB: 0, timestamp: Date(), didFail: true,
                     errorMessage: error.localizedDescription
                 )
             }
@@ -122,20 +129,14 @@ final class InferenceEngine: @unchecked Sendable {
             onProgress?(Progress(tokenCount: outputTokens, tokensPerSecond: tokensPerSecond, phase: .done))
 
             return InferenceResult(
-                id: UUID(),
-                modelId: input.modelId,
-                modelName: modelName,
+                id: UUID(), modelId: input.modelId, modelName: modelName,
                 inputTokenCount: estimateTokenCount(prompt),
                 outputTokenCount: outputTokens,
                 articleText: String(input.articleText.prefix(2000)),
                 summary: summary.trimmingCharacters(in: .whitespacesAndNewlines),
-                latencyMs: latencyMs,
-                timeToFirstTokenMs: timeToFirstTokenMs,
-                tokensPerSecond: tokensPerSecond,
-                peakMemoryMB: 0,
-                timestamp: Date(),
-                didFail: false,
-                errorMessage: nil
+                latencyMs: latencyMs, timeToFirstTokenMs: timeToFirstTokenMs,
+                tokensPerSecond: tokensPerSecond, peakMemoryMB: 0,
+                timestamp: Date(), didFail: false, errorMessage: nil
             )
         }.value
     }

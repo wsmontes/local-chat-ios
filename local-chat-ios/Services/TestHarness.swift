@@ -12,14 +12,14 @@ final class TestHarness: ObservableObject {
     private let inferenceEngine = InferenceEngine()
     private let metricsStore = MetricsStore()
 
-    func runTest(model: ModelInfo, articleText: String) async -> InferenceResult {
+    func runTest(model: ModelInfo, articleText: String, template: EditableTemplate? = nil) async -> InferenceResult {
         isRunning = true
         inferencePhase = .loading
         statusMessage = "Loading model..."
         liveTokenCount = 0
         liveTokensPerSecond = 0
 
-        let input = InferenceInput(modelId: model.id, articleText: articleText)
+        let input = InferenceInput(modelId: model.id, articleText: articleText, template: template)
 
         let beforeMem = await memoryMonitor.currentFootprintMB() ?? 0
         let startTime = Date()

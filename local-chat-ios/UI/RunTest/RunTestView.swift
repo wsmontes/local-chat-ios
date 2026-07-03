@@ -6,45 +6,59 @@ struct RunTestView: View {
     @State private var selectedModel: ModelInfo?
     @State private var models: [ModelInfo] = []
     @State private var lastResult: InferenceResult?
+    @State private var showResult = false
     @State private var currentMemoryMB: Double = 0
+
+    // Template mode
+    @State private var useTemplate = false
+    @State private var selectedPreset: PromptTemplate = .llama32Summarize
+    @State private var editedSystem: String = PromptTemplate.llama32Summarize.systemPrompt
+    @State private var editedTemplate: String = PromptTemplate.llama32Summarize.template
+    @State private var showAssembledPreview = false
 
     private let modelManager = ModelManager()
     private let memoryMonitor = MemoryMonitor()
 
     var body: some View {
         NavigationStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 20) {
-                        modelPickerSection
+            ScrollView {
+                VStack(spacing: 20) {
+                    modelPickerSection
 
-                        MemoryGaugeView(usedMemoryMB: currentMemoryMB)
-                            .padding(.horizontal)
+                    MemoryGaugeView(usedMemoryMB: currentMemoryMB)
+                        .padding(.horizontal)
 
-                        textInputSection
+                    // Mode toggle
+                    modeToggleSection
 
-                        runButtonSection
-
-                        if harness.isRunning || lastResult != nil {
-                            liveMetricsSection
-                        }
-
-                        if let result = lastResult {
-                            resultSummarySection(result)
-                                .id("result")
-                        }
+                    if useTemplate {
+                        templateEditorSection
                     }
-                    .padding(.vertical)
+
+                    articleInputSection
+
+                    if useTemplate && !articleText.isEmpty {
+                        assembledPreviewSection
+                    }
+
+                    runButtonSection
+
+                    if harness.isRunning {
+                        liveMetricsSection
+                    }
                 }
-                .onChange(of: lastResult?.id) { _, _ in
-                    if lastResult != nil {
-                        withAnimation {
-                            proxy.scrollTo("result", anchor: .top)
-                        }
-                    }
+                .padding(.vertical)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .navigationTitle("Run Test")
+            .sheet(isPresented: $showResult) {
+                if let result = lastResult {
+                    ResultSheetView(result: result)
                 }
             }
-            .navigationTitle("Run Test")
+            .sheet(isPresented: $showAssembledPreview) {
+                assembledPromptSheet
+            }
             .task {
                 models = await modelManager.discoverModels()
                 if let mem = await memoryMonitor.currentFootprintMB() {
@@ -54,37 +68,84 @@ struct RunTestView: View {
         }
     }
 
-    // MARK: - Sections
+    // MARK: - Mode Toggle
 
-    private var modelPickerSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Model")
+    private var modeToggleSection: some View {
+        HStack {
+            Text("Prompt Mode")
                 .font(.headline)
-                .padding(.horizontal)
+            Spacer()
+            Picker("Mode", selection: $useTemplate) {
+                Text("Simple").tag(false)
+                Text("Template").tag(true)
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 180)
+        }
+        .padding(.horizontal)
+    }
 
-            if models.isEmpty {
-                Text("No models found. Add GGUF files in the Models tab.")
+    // MARK: - Template Editor
+
+    private var templateEditorSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Preset picker
+            HStack {
+                Text("Preset")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .padding(.horizontal)
-            } else {
-                Picker("Model", selection: $selectedModel) {
-                    Text("Select a model…").tag(nil as ModelInfo?)
-                    ForEach(models) { model in
-                        Text("\(model.fileName) (\(model.fileSizeFormatted))")
-                            .tag(model as ModelInfo?)
+                Picker("Preset", selection: $selectedPreset) {
+                    ForEach(PromptTemplate.presets) { preset in
+                        Text(preset.name).tag(preset)
                     }
                 }
                 .pickerStyle(.menu)
-                .padding(.horizontal)
+                .onChange(of: selectedPreset) { _, preset in
+                    editedSystem = preset.systemPrompt
+                    editedTemplate = preset.template
+                }
             }
+
+            // System prompt
+            VStack(alignment: .leading, spacing: 4) {
+                Text("System Prompt — `{system}`")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextEditor(text: $editedSystem)
+                    .font(.system(.caption, design: .monospaced))
+                    .frame(minHeight: 60, maxHeight: 100)
+                    .padding(4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                    )
+            }
+            .padding(.horizontal)
+
+            // Template structure
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Template Structure — `{text}` = article, `{system}` = system prompt above")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextEditor(text: $editedTemplate)
+                    .font(.system(.caption, design: .monospaced))
+                    .frame(minHeight: 100, maxHeight: 160)
+                    .padding(4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                    )
+            }
+            .padding(.horizontal)
         }
     }
 
-    private var textInputSection: some View {
+    // MARK: - Article Input
+
+    private var articleInputSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Article Text")
+                Text(useTemplate ? "Article Text — `{text}`" : "Article Text")
                     .font(.headline)
                 Spacer()
                 Text("\(articleText.count) chars")
@@ -115,6 +176,46 @@ struct RunTestView: View {
         }
     }
 
+    // MARK: - Assembled Preview
+
+    private var assembledPreviewSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button {
+                showAssembledPreview = true
+            } label: {
+                HStack {
+                    Image(systemName: "eye")
+                    Text("Preview assembled prompt")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    private var assembledPromptSheet: some View {
+        NavigationStack {
+            ScrollView {
+                Text(currentTemplate.assemble(articleText: articleText))
+                    .font(.system(.caption, design: .monospaced))
+                    .padding()
+                    .textSelection(.enabled)
+            }
+            .navigationTitle("Assembled Prompt")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showAssembledPreview = false }
+                }
+            }
+        }
+    }
+
+    // MARK: - Run Button
+
     private var runButtonSection: some View {
         Button {
             runTest()
@@ -143,43 +244,11 @@ struct RunTestView: View {
         HStack(spacing: 24) {
             MetricBadge(label: "Tokens", value: "\(harness.liveTokenCount)")
             MetricBadge(label: "tok/s", value: String(format: "%.1f", harness.liveTokensPerSecond))
-            if !harness.isRunning {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            }
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .padding(.horizontal)
-    }
-
-    @ViewBuilder
-    private func resultSummarySection(_ result: InferenceResult) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Summary")
-                .font(.headline)
-                .padding(.horizontal)
-
-            Text(result.summary)
-                .font(.body)
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.secondary.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .padding(.horizontal)
-
-            HStack(spacing: 16) {
-                MetricBadge(label: "Latency", value: "\(String(format: "%.0f", result.latencyMs))ms")
-                MetricBadge(label: "tok/s", value: String(format: "%.1f", result.tokensPerSecond))
-                MetricBadge(label: "TTFT", value: "\(String(format: "%.0f", result.timeToFirstTokenMs))ms")
-                MetricBadge(label: "Mem", value: "\(String(format: "%.0f", result.peakMemoryMB))MB")
-            }
-            .padding(.horizontal)
-
-            LatencyBadge(tier: result.latencyTier)
-                .padding(.horizontal)
-        }
     }
 
     // MARK: - Actions
@@ -188,69 +257,28 @@ struct RunTestView: View {
         selectedModel != nil && !articleText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !harness.isRunning
     }
 
+    private var currentTemplate: EditableTemplate {
+        var et = EditableTemplate(from: selectedPreset)
+        et.editedSystemPrompt = editedSystem
+        et.editedTemplate = editedTemplate
+        return et
+    }
+
     private func runTest() {
         guard let model = selectedModel else { return }
         let text = articleText
+        let template = useTemplate ? currentTemplate : nil
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         Task {
             if let mem = await memoryMonitor.currentFootprintMB() {
                 currentMemoryMB = mem
             }
-            let result = await harness.runTest(model: model, articleText: text)
+            let result = await harness.runTest(model: model, articleText: text, template: template)
             lastResult = result
+            showResult = true
             if let mem = await memoryMonitor.currentFootprintMB() {
                 currentMemoryMB = mem
             }
-        }
-    }
-}
-
-// MARK: - Shared Subviews
-
-struct MetricBadge: View {
-    let label: String
-    let value: String
-
-    var body: some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.headline)
-                .monospacedDigit()
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
-struct LatencyBadge: View {
-    let tier: LatencyTier
-
-    var body: some View {
-        Text(tierLabel)
-            .font(.caption)
-            .fontWeight(.medium)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(backgroundColor.opacity(0.2))
-            .foregroundColor(backgroundColor)
-            .clipShape(Capsule())
-    }
-
-    private var tierLabel: String {
-        switch tier {
-        case .good: return "< 2s"
-        case .acceptable: return "2-5s"
-        case .slow: return "> 5s"
-        case .failed: return "Failed"
-        }
-    }
-
-    private var backgroundColor: Color {
-        switch tier {
-        case .good: return .green
-        case .acceptable: return .yellow
-        case .slow: return .red
-        case .failed: return .red
         }
     }
 }
