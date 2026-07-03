@@ -78,22 +78,3 @@ struct ResultDetailView: View {
     }
 }
 
-struct MetricCell: View {
-    let label: String
-    let value: String
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.headline)
-                .monospacedDigit()
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(12)
-        .background(Color.secondary.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-}
